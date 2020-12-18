@@ -1,0 +1,28 @@
+{
+  "name": "Backend-Initiative-Project",
+  "version": "1.0.0",
+  "description": "This is a base repository for the backend initiative project",
+  "main": "index.js",
+  "scripts": {
+    "devStart": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/debemenitammy/Backend-Initiative-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/debemenitammy/Backend-Initiative-Project/issues"
+  },
+  "homepage": "https://github.com/debemenitammy/Backend-Initiative-Project#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "nodemon": "^2.0.6"
+  }
+}
