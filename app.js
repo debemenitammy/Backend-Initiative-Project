@@ -10,7 +10,7 @@ const users = []; //storesponse users
 //array of movies
 const movies = [
     {
-        name: "Deborah Emeni",
+        id: 1,
         title: "Citation Movie",
         year_of_production: "2020",
         producer: "Temi Otedola",
@@ -18,7 +18,7 @@ const movies = [
         length: "120 minutes"
     },
     {
-        name: "Mike Sam",
+        id: 2,
         title: "Girlfriends Movie",
         year_of_production: "2020",
         producer: "Mike",
@@ -26,7 +26,7 @@ const movies = [
         length: "120 minutes"
     },
     {
-        name: "John Doe",
+        id: 3,
         title: "The Queen's Gambit Movie",
         year_of_production: "2020",
         producer: "John",
@@ -34,7 +34,7 @@ const movies = [
         length: "120 minutes"
     },
     {
-        name: "Grace Ifan",
+        id: 4,
         title: "Grand Army Movie",
         year_of_production: "2020",
         producer: "Francis",
@@ -88,15 +88,62 @@ app.post('/users/login', async(request, response) => {
         }
 });
 
-//Allows a user rent a movie
-app.get('/users/rentals', authenticateToken, (request, response) => {
-    const {name} = request.user;
-    const movieRenter = movies.filter(movie => movie.name === name);
-    if (!movieRenter) {
+
+//Allow users rent movie(s)
+app.post('/users/rentals', authenticateToken, (request, response) => {
+    const rent = {
+        id: request.body.id,
+        title: request.body.title,
+        year_of_production: request.body.year_of_production,
+        producer: request.body.producer,
+        genre: request.body.genre,
+        length: request.body.length
+    };
+    movies.push(rent);
+    response.send(rent);
+});
+
+
+//Allows users view rented movie(s)
+app.get('/users/rentals/:id', authenticateToken, (request, response) => {
+    const movieId = request.params.id;
+    console.log(movieId);
+    // const {name} = request.user;
+    const renter = movies.find(movie => movie.id === parseInt(movieId));
+    if (!renter) {
         return response.send("User can not rent a movie");
     }
-    response.json(movieRenter);
+    response.json(renter);
 });
+
+//Allows users update movie(s)
+app.put('/users/rentals/:id', (request, response) => {
+    const updateMovies = movies.find(movie => movie.id === parseInt(request.params.id));
+    if(!updateMovies) return response.status(404).send("movie can not be updated");
+
+    const updatedMovies = {
+        id: request.body.id,
+        title: request.body.title,
+        year_of_production: request.body.year_of_production,
+        producer: request.body.producer,
+        genre: request.body.genre,
+        length: request.body.length
+    };
+    response.send(updatedMovies);
+});
+
+
+//Allows users delete movie(s)
+app.delete('/users/rentals/:id', (request, response) => {
+    const deleteMovie = movies.find(movie => movie.id === parseInt(request.params.id));
+    if(!deleteMovie) return response.status(404).send("movie cannot be deleted");
+
+    const index = movies.indexOf(deleteMovie);
+    movies.splice(index, 1);
+
+    response.send(deleteMovie);
+});
+
 
 
 //Authenticate Token
