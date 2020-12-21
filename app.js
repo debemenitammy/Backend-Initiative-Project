@@ -45,7 +45,7 @@ const movies = [
 
 //gets all users
 app.get('/users', (request, response) => {
-    response.status(200).send(users); //responds with all users
+    response.status(201).send(users); //responds with all users
 });
 
 //creates the user
@@ -58,9 +58,9 @@ app.post('/users/signup', async(request, response) => {
         console.log(hashedPassword);
         const user = { name: request.body.name, password: hashedPassword };
         users.push(user);
-        response.status(200).send(users);
+        response.status(201).send(users);
     } catch(error) {
-        response.status(201).send(error);
+        response.status(500).send(error);
     }
 });
 
@@ -81,7 +81,7 @@ app.post('/users/login', async(request, response) => {
                 const name = request.body.name;
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
                 response.json({ accessToken: accessToken });
-                response.send("success");
+                response.status(201).send("success");
             }
         } catch(error) {
             response.status(500).send("User not allowed");
@@ -91,57 +91,73 @@ app.post('/users/login', async(request, response) => {
 
 //Allow users rent movie(s)
 app.post('/users/rentals', authenticateToken, (request, response) => {
-    const rent = {
-        id: request.body.id,
-        title: request.body.title,
-        year_of_production: request.body.year_of_production,
-        producer: request.body.producer,
-        genre: request.body.genre,
-        length: request.body.length
-    };
-    movies.push(rent);
-    response.send(rent);
+    try {
+        const rent = {
+            id: request.body.id,
+            title: request.body.title,
+            year_of_production: request.body.year_of_production,
+            producer: request.body.producer,
+            genre: request.body.genre,
+            length: request.body.length
+        };
+        movies.push(rent);
+        response.status(201).send(rent);
+    } catch(error) {
+        response.status(500).send("Can not rent movie");
+    }
 });
 
 
 //Allows users view rented movie(s)
 app.get('/users/rentals/:id', authenticateToken, (request, response) => {
-    const movieId = request.params.id;
-    console.log(movieId);
-    // const {name} = request.user;
-    const renter = movies.find(movie => movie.id === parseInt(movieId));
-    if (!renter) {
-        return response.send("User can not rent a movie");
+    try {
+        const movieId = request.params.id;
+        console.log(movieId);
+        // const {name} = request.user;
+        const renter = movies.find(movie => movie.id === parseInt(movieId));
+        if (!renter) {
+            return response.send("User can not rent a movie");
+        }
+        response.status(200).json(renter);
+    } catch(err) {
+        response.status(404).send("No rented movie found");
     }
-    response.json(renter);
 });
 
 //Allows users update movie(s)
-app.put('/users/rentals/:id', (request, response) => {
-    const updateMovies = movies.find(movie => movie.id === parseInt(request.params.id));
-    if(!updateMovies) return response.status(404).send("movie can not be updated");
+app.put('/users/rentals/:id', authenticateToken, (request, response) => {
+    try {
+        const updateMovies = movies.find(movie => movie.id === parseInt(request.params.id));
+        if(!updateMovies) return response.status(404).send("movie can not be updated");
 
-    const updatedMovies = {
-        id: request.body.id,
-        title: request.body.title,
-        year_of_production: request.body.year_of_production,
-        producer: request.body.producer,
-        genre: request.body.genre,
-        length: request.body.length
-    };
-    response.send(updatedMovies);
+        const updatedMovies = {
+            id: request.body.id,
+            title: request.body.title,
+            year_of_production: request.body.year_of_production,
+            producer: request.body.producer,
+            genre: request.body.genre,
+            length: request.body.length
+        };
+        response.status(200).send(updatedMovies);
+    } catch(error) {
+        respond.status(500).send("Movie can not be updated");
+    }
 });
 
 
 //Allows users delete movie(s)
-app.delete('/users/rentals/:id', (request, response) => {
-    const deleteMovie = movies.find(movie => movie.id === parseInt(request.params.id));
-    if(!deleteMovie) return response.status(404).send("movie cannot be deleted");
+app.delete('/users/rentals/:id', authenticateToken, (request, response) => {
+    try {
+        const deleteMovie = movies.find(movie => movie.id === parseInt(request.params.id));
+        if(!deleteMovie) return response.status(404).send("movie cannot be deleted");
 
-    const index = movies.indexOf(deleteMovie);
-    movies.splice(index, 1);
+        const index = movies.indexOf(deleteMovie);
+        movies.splice(index, 1);
 
-    response.send(deleteMovie);
+        response.send(deleteMovie);
+    } catch(error) {
+        response.status(500).send("Can not delete movie");
+    }
 });
 
 
